@@ -228,12 +228,12 @@ void handleRoot() {
   html += "<button onclick=\"location.href='/simulateContact2'\">Simuliere Kontakt 2</button>";
 
   html += "<h2>Error-Log</h2><div id='log'></div>";
-  html += "<p style='text-align:right; color:#888;'>Firmware: " + String(FIRMWARE_VERSION) + "</p>";
-  html += "</div>";
   html += "<form id='logForm' action='/clearLog' method='POST'>";
   html += "<input type='hidden' name='password' id='logPasswordField'>";
   html += "<input type='button' value='Error-Log löschen' onclick='showLogPasswordModal()'>";
-  html += "</form>";
+  html += "</form>"; 
+  html += "<p style='text-align:right; color:#888;'>Firmware: " + String(FIRMWARE_VERSION) + "</p>";
+  html += "</div>";
 
 
   // Modal für Passwort-Eingabe Chat-ID ändern
