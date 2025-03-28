@@ -176,7 +176,8 @@ void handleStatus() {
   String json = "{";
   json += "\"contact1\":\"" + contactStatus1 + "\",";
   json += "\"contact2\":\"" + contactStatus2 + "\",";
-  json += "\"errorLog\":\"" + escapeJSONString(errorLog) + "\"";
+  json += "\"errorLog\":\"" + escapeJSONString(errorLog) + "\",";
+  json += "\"time\":\"" + getCurrentTimeString() + "\"";
   json += "}";
   server.send(200, "application/json", json);
 }
@@ -203,30 +204,35 @@ void handleRoot() {
   html += "document.getElementById('status2').innerHTML = data.contact2;";
   html += "document.getElementById('log').innerHTML = data.errorLog.replace(/\\n/g, '<br>');";
   html += "}};xhttp.open('GET', '/status', true);xhttp.send();}";
-  html += "setInterval(updateStatus, 3000);window.onload = updateStatus;</script></head><body>";
-
+  html += "window.onload = function() {";
+  html += "  updateStatus();";
+  html += "  startLiveClock('" + getCurrentTimeString() + "');";
+  html += "  setInterval(updateStatus, 3000);";
+  html += "};</script></head><body>";
+  //Anfang Inhalt
   html += "<div class='container'>";
   html += "<h1>MuehlenBuddy Dashboard</h1><h2>Kontaktstatus</h2>";
   html += "<p>Kontakt 1: <strong><span id='status1'>" + contactStatus1 + "</span></strong></p>";
   html += "<p>Kontakt 2: <strong><span id='status2'>" + contactStatus2 + "</span></strong></p>";
-
+  //Nachrichten
   html += "<h2>Nachrichtentexte anpassen</h2>";
   html += "<form action='/setMessages' method='GET'>";
   html += "Kontakt 1: <input type='text' name='msg1' value='" + customText1 + "'>";
   html += "Kontakt 2: <input type='text' name='msg2' value='" + customText2 + "'>";
+  html += "<p style='text-align:right; color:#888;'>ESP-Zeit: <span id='espTime'></span></p>";
   html += "<input type='submit' value='Nachrichten aktualisieren'></form>";
-
+  //Telegram
   html += "<h2>Telegram Chat-ID</h2>";
   html += "<form id='chatForm' action='/setChatId' method='POST'>";
   html += "Chat-ID: <input type='text' name='chatid' value='" + chatId + "'>";
   html += "<input type='hidden' name='password' id='passwordField'>";
   html += "<input type='button' value='Chat-ID speichern' onclick='showPasswordModal()'>";
   html += "</form>";
-
+  //Simulation
   html += "<h2>Simulation</h2>";
   html += "<button onclick=\"location.href='/simulateContact1'\">Simuliere Kontakt 1</button> ";
   html += "<button onclick=\"location.href='/simulateContact2'\">Simuliere Kontakt 2</button>";
-
+  //Error-Log
   html += "<h2>Error-Log</h2><div id='log'></div>";
   html += "<form id='logForm' action='/clearLog' method='POST'>";
   html += "<input type='hidden' name='password' id='logPasswordField'>";
@@ -234,11 +240,9 @@ void handleRoot() {
   html += "</form>"; 
   html += "<p style='text-align:right; color:#888;'>Firmware: " + String(FIRMWARE_VERSION) + "</p>";
   html += "</div>";
-
-
   // Modal für Passwort-Eingabe Chat-ID ändern
   html += "<div id='passwordModal' style='display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:#fff; ";
-      html += "padding:20px; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000; border-radius:10px;'>";
+  html += "padding:20px; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000; border-radius:10px;'>";
   html += "<h3>Passwort eingeben</h3>";
   html += "<div style='display:flex; align-items:center;'>";
   html += "<input type='password' id='passwordInput' style='flex:1;'>";
@@ -285,8 +289,17 @@ void handleRoot() {
   html += "var input = document.getElementById('logPasswordInput');";
   html += "input.type = (input.type === 'password') ? 'text' : 'password';";
   html += "}";
-  html += "</script>";
+  html += "let espClock;";
+  html += "function startLiveClock(baseTimeStr) {";
+  html += "  let now = new Date(baseTimeStr);";
+  html += "  espClock = setInterval(() => {";
+  html += "    now.setSeconds(now.getSeconds() + 1);";
+  html += "    document.getElementById('espTime').innerText = now.toLocaleString('de-DE');";
+  html += "  }, 1000);";
+  html += "}";
 
+  html += "</script>";
+  //Java-Script Ende
   html += "</body></html>";
   server.send(200, "text/html", html);
 }
