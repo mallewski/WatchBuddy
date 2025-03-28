@@ -83,7 +83,18 @@ String getCurrentTimeString() {
 
 void logEvent(String eventMessage) {
   String timestamp = getCurrentTimeString();
-  errorLog += timestamp + " - " + eventMessage + "\n";
+  String logEntry = timestamp + " - " + eventMessage + "\n";
+  errorLog += logEntry;
+
+  prefs.begin("config", false);
+  prefs.putString("elog", errorLog);
+  prefs.end();
+}
+
+void loadErrorLog() {
+  prefs.begin("config", true);
+  errorLog = prefs.getString("elog", "");
+  prefs.end();
 }
 
 void sendTelegramMessage(String message) {
@@ -219,8 +230,13 @@ void handleRoot() {
   html += "<h2>Error-Log</h2><div id='log'></div>";
   html += "<p style='text-align:right; color:#888;'>Firmware: " + String(FIRMWARE_VERSION) + "</p>";
   html += "</div>";
+  html += "<form id='logForm' action='/clearLog' method='POST'>";
+  html += "<input type='hidden' name='password' id='logPasswordField'>";
+  html += "<input type='button' value='Error-Log löschen' onclick='showLogPasswordModal()'>";
+  html += "</form>";
 
-  // Modal für Passwort-Eingabe
+
+  // Modal für Passwort-Eingabe Chat-ID ändern
   html += "<div id='passwordModal' style='display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:#fff; ";
       html += "padding:20px; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000; border-radius:10px;'>";
   html += "<h3>Passwort eingeben</h3>";
@@ -232,12 +248,43 @@ void handleRoot() {
   html += "<button onclick='hidePasswordModal()'>Abbrechen</button>";
   html += "</div>";
   html += "<div id='modalBackdrop' onclick='hidePasswordModal()' style='display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index:999;'></div>";
-
+  //Modal für Passworteingabe Error-Log löschen
+  html += "<div id='logPasswordModal' style='display:none; position:fixed; top:40%; left:50%; transform:translate(-50%, -50%); background:#fff; ";
+  html += "padding:20px; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000; border-radius:10px;'>";
+  html += "<h3>Passwort für Log-Löschung</h3>";
+  html += "<div style='display:flex; align-items:center;'>";
+  html += "<input type='password' id='logPasswordInput' style='flex:1;'>";
+  html += "<button type='button' onclick='toggleLogPassword()' style='background:transparent; border:none; font-size:1.2em; cursor:pointer; padding:0 6px; margin-left:6px;'>👁️</button>";
+  html += "</div><br>";
+  html += "<button onclick='submitLogForm()'>OK</button> ";
+  html += "<button onclick='hideLogPasswordModal()'>Abbrechen</button>";
+  html += "</div>";
+  //Java-Script
   html += "<script>";
   html += "function showPasswordModal() { document.getElementById('passwordModal').style.display = 'block'; document.getElementById('modalBackdrop').style.display = 'block'; document.getElementById('passwordInput').value = ''; document.getElementById('passwordInput').focus(); }";
   html += "function hidePasswordModal() { document.getElementById('passwordModal').style.display = 'none'; document.getElementById('modalBackdrop').style.display = 'none'; }";
   html += "function submitChatForm() { var pw = document.getElementById('passwordInput').value; if (!pw) return; document.getElementById('passwordField').value = pw; document.getElementById('chatForm').submit(); }";
   html += "function togglePassword() { var input = document.getElementById('passwordInput'); input.type = (input.type === 'password') ? 'text' : 'password'; }";
+  html += "function showLogPasswordModal() {";
+  html += "document.getElementById('logPasswordModal').style.display = 'block';";
+  html += "document.getElementById('modalBackdrop').style.display = 'block';";
+  html += "document.getElementById('logPasswordInput').value = '';";
+  html += "document.getElementById('logPasswordInput').focus();";
+  html += "}";
+  html += "function hideLogPasswordModal() {";
+  html += "document.getElementById('logPasswordModal').style.display = 'none';";
+  html += "document.getElementById('modalBackdrop').style.display = 'none';";
+  html += "}";
+  html += "function submitLogForm() {";
+  html += "var pw = document.getElementById('logPasswordInput').value;";
+  html += "if (!pw) return;";
+  html += "document.getElementById('logPasswordField').value = pw;";
+  html += "document.getElementById('logForm').submit();";
+  html += "}";
+  html += "function toggleLogPassword() {";
+  html += "var input = document.getElementById('logPasswordInput');";
+  html += "input.type = (input.type === 'password') ? 'text' : 'password';";
+  html += "}";
   html += "</script>";
 
   html += "</body></html>";
@@ -292,6 +339,23 @@ void handleSetMessages() {
   server.send(303);
 }
 
+void handleClearLog() {
+  if (server.hasArg("password")) {
+    String pw = server.arg("password");
+    if (pw == configPassword) {
+      errorLog = "";
+      prefs.begin("config", false);
+      prefs.remove("elog");
+      prefs.end();
+      logEvent("ErrorLog gelöscht");
+    } else {
+      logEvent("Falsches Passwort für Log-Löschung!");
+    }
+  }
+  server.sendHeader("Location", "/");
+  server.send(303);
+}
+
 bool connectToWiFi() {
   Serial.println("WLAN-Verbindung wird versucht...");
   for (int i = 0; i < wifiCount; i++) {
@@ -319,6 +383,7 @@ bool connectToWiFi() {
 void setup() {
   Serial.begin(115200);
   loadCustomTexts();
+  loadErrorLog();
   pinMode(CONTACT_PIN1, INPUT_PULLUP);
   pinMode(CONTACT_PIN2, INPUT_PULLUP);
   WiFi.setHostname("MuehlenBuddy");
@@ -346,6 +411,7 @@ void setup() {
   server.on("/simulateContact2", handleSimulateContact2);
   server.on("/setMessages", handleSetMessages);
   server.on("/setChatId", handleSetChatId);
+  server.on("/clearLog", handleClearLog);
   server.begin();
 }
 

@@ -17,7 +17,7 @@ ESP32-basiertes Projekt zur Überwachung von Kontakten mit Telegram-Benachrichti
 ## Dateien
 
 - `MuehlenBuddy.ino` – Hauptsketch
-- `secrets.h` – sensible Daten (nicht in Git speichern!)
+- `secrets.h` – sensible Daten (nicht in Git gespeichert!)
 - `.gitignore` – schützt `secrets.h` vor versehentlichem Upload
 - `README.md` – dieses Dokument
 
