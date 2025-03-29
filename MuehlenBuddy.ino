@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "v25.3.2"
+#define FIRMWARE_VERSION "v25.3.3"
 
 #include "secrets.h"
 #include <WiFi.h>
@@ -219,7 +219,9 @@ void handleRoot() {
   html += "};</script></head><body>";
   //Anfang Inhalt
   html += "<div class='container'>";
-  html += "<h1>MuehlenBuddy Dashboard</h1><h2>Kontaktstatus</h2>";
+  html += "<h1>MuehlenBuddy Dashboard</h1>";
+  html += "<p style='text-align:right; color:#888;'>ESP-Zeit: <span id='espTime'></span></p>";
+  html += "<h2>Kontaktstatus</h2>";
   html += "<p>Kontakt 1: <strong><span id='status1'>" + contactStatus1 + "</span></strong></p>";
   html += "<p>Kontakt 2: <strong><span id='status2'>" + contactStatus2 + "</span></strong></p>";
   //Nachrichten
@@ -227,7 +229,6 @@ void handleRoot() {
   html += "<form action='/setMessages' method='GET'>";
   html += "Kontakt 1: <input type='text' name='msg1' value='" + customText1 + "'>";
   html += "Kontakt 2: <input type='text' name='msg2' value='" + customText2 + "'>";
-  html += "<p style='text-align:left; color:#888;'>ESP-Zeit: <span id='espTime'></span></p>";
   html += "<input type='submit' value='Nachrichten aktualisieren'></form>";
   //Telegram
   html += "<h2>Telegram Chat-ID</h2>";
@@ -448,12 +449,12 @@ void loop() {
   unsigned long currentMillis = millis();
   if (currentState1 == LOW && lastContactState1 == HIGH && (currentMillis - lastSendTime1 >= debounceInterval)) {
     sendTelegramMessage(customText1);
-    logEvent("Kontakt 1 betätigt");
+    //logEvent("Kontakt 1 betätigt"); //Log wächst sonst möglicherweise zu stark an.
     lastSendTime1 = currentMillis;
   }
   if (currentState2 == LOW && lastContactState2 == HIGH && (currentMillis - lastSendTime2 >= debounceInterval)) {
     sendTelegramMessage(customText2);
-    logEvent("Kontakt 2 betätigt");
+    //logEvent("Kontakt 2 betätigt"); //Log wächst sonst möglicherweise zu stark an.
     lastSendTime2 = currentMillis;
   }
 
