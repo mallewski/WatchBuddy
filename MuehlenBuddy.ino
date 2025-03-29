@@ -72,13 +72,21 @@ String urlEncode(const String &str) {
   }
   return encoded;
 }
-
+//Zeitausgabe für Log und Nachrichten
 String getCurrentTimeString() {
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo)) return "Keine Zeit";
-  char timeString[64];
-  strftime(timeString, sizeof(timeString), "%d.%m.%Y %H:%M:%S", &timeinfo);
-  return String(timeString);
+  char buf[30];
+  strftime(buf, sizeof(buf), "%d.%m.%Y %H:%M:%S", &timeinfo);
+  return String(buf);
+}
+//Zeitausgabe für Dashboard
+String getCurrentTimeISO() {
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo)) return "1970-01-01T00:00:00";
+  char buf[30];
+  strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", &timeinfo);
+  return String(buf);
 }
 
 void logEvent(String eventMessage) {
@@ -206,7 +214,7 @@ void handleRoot() {
   html += "}};xhttp.open('GET', '/status', true);xhttp.send();}";
   html += "window.onload = function() {";
   html += "  updateStatus();";
-  html += "  startLiveClock('" + getCurrentTimeString() + "');";
+  html += "  startLiveClock('" + getCurrentTimeISO() + "');";
   html += "  setInterval(updateStatus, 3000);";
   html += "};</script></head><body>";
   //Anfang Inhalt
@@ -219,7 +227,7 @@ void handleRoot() {
   html += "<form action='/setMessages' method='GET'>";
   html += "Kontakt 1: <input type='text' name='msg1' value='" + customText1 + "'>";
   html += "Kontakt 2: <input type='text' name='msg2' value='" + customText2 + "'>";
-  html += "<p style='text-align:right; color:#888;'>ESP-Zeit: <span id='espTime'></span></p>";
+  html += "<p style='text-align:left; color:#888;'>ESP-Zeit: <span id='espTime'></span></p>";
   html += "<input type='submit' value='Nachrichten aktualisieren'></form>";
   //Telegram
   html += "<h2>Telegram Chat-ID</h2>";
