@@ -24,7 +24,7 @@ ESP32-basiertes Projekt zur Überwachung von Kontakten mit Telegram-Benachrichti
 ## Webinterface (Dashboard)
 
 Hier siehst du:
-- Aktuelle Uhrzeite des ESP (Wird in Nachrichten und Error-Log verwendet)
+- Aktuelle Uhrzeit des ESP (Wird in Nachrichten und Error-Log verwendet)
 - Aktuelle Zustände der Kontakte (offen / geschlossen)
 - Fehlerprotokoll mit Zeitstempel
 - Formular zur Anpassung der Nachrichtentexte
