@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "v25.3.3"
+#define FIRMWARE_VERSION "v25.3.4"
 
 #include "secrets.h"
 #include <WiFi.h>
@@ -197,11 +197,53 @@ void handleRoot() {
   html += ".container { max-width: 800px; margin: 30px auto; background: #fff; padding: 20px; box-shadow: 0 0 12px rgba(0,0,0,0.1); border-radius: 10px; }";
   html += "h1, h2 { color: #333; }";
   html += "input[type='text'], input[type='password'] { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 5px; }";
-  html += "input[type='submit'], input[type='button'], button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 5px; }";
-  html += "input[type='submit']:hover, button:hover { background: #0056b3; }";
+  html += "input[type='submit'], input[type='button'], ";
+  html += "input[type='submit']:hover";
   html += "form { margin-bottom: 20px; }";
   html += "#log { background:#eee; padding:10px; max-height:200px; overflow:auto; font-family: monospace; white-space: pre-wrap; }";
   html += "#passwordModal, #modalBackdrop { display:none; }";
+  html += "button, input[type='button'], input[type='submit'] {";
+  html += "  background-color: #e1ecf4;";
+  html += "  border-radius: 3px;";
+  html += "  border: 1px solid #7aa7c7;";
+  html += "  box-shadow: rgba(255, 255, 255, .7) 0 1px 0 0 inset;";
+  html += "  box-sizing: border-box;";
+  html += "  color: #39739d;";
+  html += "  cursor: pointer;";
+  html += "  display: inline-block;";
+  html += "  font-family: -apple-system,system-ui,\"Segoe UI\",\"Liberation Sans\",sans-serif;";
+  html += "  font-size: 13px;";
+  html += "  font-weight: 400;";
+  html += "  line-height: 1.15385;";
+  html += "  margin: 0;";
+  html += "  outline: none;";
+  html += "  padding: 8px .8em;";
+  html += "  position: relative;";
+  html += "  text-align: center;";
+  html += "  text-decoration: none;";
+  html += "  user-select: none;";
+  html += "  -webkit-user-select: none;";
+  html += "  touch-action: manipulation;";
+  html += "  vertical-align: baseline;";
+  html += "  white-space: nowrap;";
+  html += "}";
+
+  html += "button:hover, input[type='button']:hover, input[type='submit']:hover,";
+  html += "button:focus, input[type='button']:focus, input[type='submit']:focus {";
+  html += "  background-color: #b3d3ea;";
+  html += "  color: #2c5777;";
+  html += "}";
+
+  html += "button:focus, input[type='button']:focus, input[type='submit']:focus {";
+  html += "  box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);";
+  html += "}";  
+
+  html += "button:active, input[type='button']:active, input[type='submit']:active {";
+  html += "  background-color: #a0c7e4;";
+    html += "  box-shadow: none;";
+  html += "  color: #2c5777;";
+  html += "}";
+
   html += "</style>";
   html += "<script>function updateStatus() {";
   html += "var xhttp = new XMLHttpRequest();";
@@ -220,7 +262,7 @@ void handleRoot() {
   //Anfang Inhalt
   html += "<div class='container'>";
   html += "<h1>MuehlenBuddy Dashboard</h1>";
-  html += "<p style='text-align:right; color:#888;'>ESP-Zeit: <span id='espTime'></span></p>";
+  html += "<p style='text-align:right; color:#888;'>Modul-Zeit: <span id='espTime'></span></p>";
   html += "<h2>Kontaktstatus</h2>";
   html += "<p>Kontakt 1: <strong><span id='status1'>" + contactStatus1 + "</span></strong></p>";
   html += "<p>Kontakt 2: <strong><span id='status2'>" + contactStatus2 + "</span></strong></p>";
@@ -243,7 +285,7 @@ void handleRoot() {
   html += "<button onclick=\"location.href='/simulateContact2'\">Simuliere Kontakt 2</button>";
   //Error-Log
   html += "<h2>Error-Log</h2><div id='log'></div>";
-  html += "<form id='logForm' action='/clearLog' method='POST'>";
+  html += "<form id='logForm' action='/clearLog' method='POST'><br>";
   html += "<input type='hidden' name='password' id='logPasswordField'>";
   html += "<input type='button' value='Error-Log löschen' onclick='showLogPasswordModal()'>";
   html += "</form>"; 
