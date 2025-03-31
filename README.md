@@ -8,16 +8,15 @@ ESP32-basiertes Projekt zur Überwachung von Kontakten mit Telegram-Benachrichti
 - Lokales Webinterface zur Anzeige, Konfiguration und Fehlersuche
 - Automatische Verbindung mit mehreren bekannten WLANs
 - Anpassbare Nachrichtentexte über das Dashboard
-- Passwortgeschützte Konfiguration (OTA + Chat-ID)
 - Automatische Chat-ID-Aktualisierung bei Telegram-Gruppenmigration
-- OTA-Updates direkt über Netzwerk
+- Passwortgeschützte Konfiguration
 - Loganzeige im Webinterface
-- Automatische Verbindung mit mehreren bekannten WLANs
+- OTA-Updates direkt über Netzwerk
 
 ## Dateien
 
 - `MuehlenBuddy.ino` – Hauptsketch
-- `secrets.h` – sensible Daten (nicht in Git gespeichert!)
+- `secrets.h` – sensible Daten (nicht in Git gespeichert! Siehe `secrets_template.h`)
 - `.gitignore` – schützt `secrets.h` vor versehentlichem Upload
 - `README.md` – dieses Dokument
 
@@ -28,9 +27,10 @@ Hier siehst du:
 - Aktuelle Zustände der Kontakte (offen / geschlossen)
 - Fehlerprotokoll mit Zeitstempel
 - Formular zur Anpassung der Nachrichtentexte
-- Telegram Chat-ID ändern (passwortgeschützt)
-- Kontakt-Simulation mit direkter Telegram-Auslösung
-- Firmware-Versionsanzeige (`v25.3.x`)
+- Anzeige der aktuellen Telegram Chat-ID.
+- Möglichkeit aktuelle Telegram-Chat-ID zu ändern (passwortgeschützt)
+- Kontakt-Simulation mit direkter Telegram-Auslösung (Troubleshooting)
+- Firmware-Versionsanzeige
 
 ## Telegram-Nachrichten
 
@@ -45,6 +45,20 @@ Hinweis: Wenn der Gruppenchat zu einer „Supergroup“ migriert wird, wird die 
 - OTA-Updates nur nach Authentifizierung
 - Telegram-Zugang ist auf deinen Bot & deine Chat-ID begrenzt
 
+## Vorbedingungen
+
+- Telegram-Bot erstellen
+  -> Suche in Telegram nach @BotFather.
+  -> Schreibe /newbot und folge den Anweisungen.
+  -> Gib Name und Benutzername (muss auf bot enden) ein.
+  -> Du erhältst ein Bot-Token → sicher speichern.
+  -> Fertig! Dein Bot ist jetzt einsatzbereit.
+  
+- Chat-ID von Chat oder Gruppen-Chat ermitteln.
+  -> Schreibe dem Bot eine Nachricht bei Telegram.
+  -> Öffne im Browser: `https://api.telegram.org/bot<DEIN_BOT_TOKEN>/getUpdates`
+  -> Suche in der Antwort nach "chat":{"id":...} → Das ist die Chat-ID.
+
 ## Erweiterungsideen
 
 - Push via MQTT oder E-Mail
@@ -54,8 +68,6 @@ Hinweis: Wenn der Gruppenchat zu einer „Supergroup“ migriert wird, wird die 
 
 ## Version
 
-Aktuelle Firmware: `v25.3.2`
-
-Änderungen siehst du im Error-Log oder per Versionshinweis im Dashboard.
+Aktuelle Firmware: `v25.3.4`
 
 Made with Liebe und ESP32.
