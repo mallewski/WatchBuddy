@@ -72,5 +72,3 @@ Hinweis: Wenn der Gruppenchat zu einer „Supergroup“ migriert wird, wird die 
 Aktuelle Firmware: `v25.3.4`
 
 Made with Liebe und ESP32.
-
-<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="mallewski" data-color="#FFDD00" data-emoji="☕"  data-font="Cookie" data-text="Buy me a coffee" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
