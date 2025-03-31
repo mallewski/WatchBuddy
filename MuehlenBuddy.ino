@@ -14,16 +14,22 @@ const String telegramUrl = "https://api.telegram.org/bot" + botToken + "/sendMes
 String chatId = defaultChatId;
 
 // Definition der Eingangs-Pins für die Kontakte
-const int CONTACT_PIN1 = 12;
-const int CONTACT_PIN2 = 14;
+const int CONTACT_PIN1 = 12; // bei nächster Gelegenheit zu Pin 14 wechseln (Du hast an GPIO12 einen Taster, der nach GND zieht (normal für INPUT_PULLUP) → beim Einschalten wird GPIO12 LOW → ESP32 bootet nicht mehr korrekt!)
+const int CONTACT_PIN2 = 27;
+const int CONTACT_PIN3 = 26; 
+const int CONTACT_PIN4 = 25;
 
 // Variablen zum Überwachen der physischen Kontakte
 int lastContactState1 = HIGH;
 int lastContactState2 = HIGH;
+int lastContactState3 = HIGH;
+int lastContactState4 = HIGH;
 
 // Status-Strings
 String contactStatus1 = "Unbekannt";
 String contactStatus2 = "Unbekannt";
+String contactStatus3 = "Unbekannt";
+String contactStatus4 = "Unbekannt";
 
 // Log-Daten
 String errorLog = "";
@@ -31,6 +37,9 @@ String errorLog = "";
 // Benutzerdefinierte Nachrichtentexte
 String customText1 = "Mühle ist durchgelaufen!";
 String customText2 = "Kontakt 2 wurde betätigt!";
+String customText3 = "Kontakt 3 wurde betätigt!";
+String customText4 = "Kontakt 4 wurde betätigt!";
+
 
 Preferences prefs;
 
@@ -38,6 +47,8 @@ void loadCustomTexts() {
   prefs.begin("config", false);
   customText1 = prefs.getString("ct1", customText1);
   customText2 = prefs.getString("ct2", customText2);
+  customText3 = prefs.getString("ct3", customText3);
+  customText4 = prefs.getString("ct4", customText4);
   chatId = prefs.getString("chat_id", chatId);
   prefs.end();
 }
@@ -46,6 +57,8 @@ void saveCustomTexts() {
   prefs.begin("config", false);
   prefs.putString("ct1", customText1);
   prefs.putString("ct2", customText2);
+  prefs.putString("ct3", customText3);
+  prefs.putString("ct4", customText4);
   prefs.putString("chat_id", chatId);
   prefs.end();
 }
@@ -53,6 +66,8 @@ void saveCustomTexts() {
 const unsigned long debounceInterval = 1000;
 unsigned long lastSendTime1 = 0;
 unsigned long lastSendTime2 = 0;
+unsigned long lastSendTime3 = 0;
+unsigned long lastSendTime4 = 0;
 
 WebServer server(80);
 
@@ -184,6 +199,8 @@ void handleStatus() {
   String json = "{";
   json += "\"contact1\":\"" + contactStatus1 + "\",";
   json += "\"contact2\":\"" + contactStatus2 + "\",";
+  json += "\"contact3\":\"" + contactStatus3 + "\",";
+  json += "\"contact4\":\"" + contactStatus4 + "\",";
   json += "\"errorLog\":\"" + escapeJSONString(errorLog) + "\",";
   json += "\"time\":\"" + getCurrentTimeString() + "\"";
   json += "}";
@@ -196,7 +213,7 @@ void handleRoot() {
   html += "body { font-family: sans-serif; background:#f4f4f4; margin:0; padding:0; }";
   html += ".container { max-width: 800px; margin: 30px auto; background: #fff; padding: 20px; box-shadow: 0 0 12px rgba(0,0,0,0.1); border-radius: 10px; }";
   html += "h1, h2 { color: #333; }";
-  html += "input[type='text'], input[type='password'] { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 5px; }";
+  html += "input[type='text'], input[type='password'] { width: 100%; padding: 10px; margin: 5px 0 5px; border: 1px solid #ccc; border-radius: 5px; }";
   html += "input[type='submit'], input[type='button'], ";
   html += "input[type='submit']:hover";
   html += "form { margin-bottom: 20px; }";
@@ -215,7 +232,7 @@ void handleRoot() {
   html += "  font-size: 13px;";
   html += "  font-weight: 400;";
   html += "  line-height: 1.15385;";
-  html += "  margin: 0;";
+  html += "  margin: 10px 0 0;";
   html += "  outline: none;";
   html += "  padding: 8px .8em;";
   html += "  position: relative;";
@@ -252,6 +269,8 @@ void handleRoot() {
   html += "var data = JSON.parse(this.responseText);";
   html += "document.getElementById('status1').innerHTML = data.contact1;";
   html += "document.getElementById('status2').innerHTML = data.contact2;";
+  html += "document.getElementById('status3').innerHTML = data.contact3;";
+  html += "document.getElementById('status4').innerHTML = data.contact4;";
   html += "document.getElementById('log').innerHTML = data.errorLog.replace(/\\n/g, '<br>');";
   html += "}};xhttp.open('GET', '/status', true);xhttp.send();}";
   html += "window.onload = function() {";
@@ -264,13 +283,18 @@ void handleRoot() {
   html += "<h1>MuehlenBuddy Dashboard</h1>";
   html += "<p style='text-align:right; color:#888;'>Modul-Zeit: <span id='espTime'></span></p>";
   html += "<h2>Kontaktstatus</h2>";
-  html += "<p>Kontakt 1: <strong><span id='status1'>" + contactStatus1 + "</span></strong></p>";
-  html += "<p>Kontakt 2: <strong><span id='status2'>" + contactStatus2 + "</span></strong></p>";
+  html += "<p>Kontakt 1 (P" + String(CONTACT_PIN1) + "): <strong><span id='status1'>" + contactStatus1 + "</span></strong></p>";
+  html += "<p>Kontakt 2 (P" + String(CONTACT_PIN2) + "): <strong><span id='status2'>" + contactStatus2 + "</span></strong></p>";
+  html += "<p>Kontakt 3 (P" + String(CONTACT_PIN3) + "): <strong><span id='status3'>" + contactStatus3 + "</span></strong></p>";
+  html += "<p>Kontakt 4 (P" + String(CONTACT_PIN4) + "): <strong><span id='status4'>" + contactStatus4 + "</span></strong></p>";
+
   //Nachrichten
   html += "<h2>Nachrichtentexte anpassen</h2>";
   html += "<form action='/setMessages' method='GET'>";
   html += "Kontakt 1: <input type='text' name='msg1' value='" + customText1 + "'>";
   html += "Kontakt 2: <input type='text' name='msg2' value='" + customText2 + "'>";
+  html += "Kontakt 3: <input type='text' name='msg3' value='" + customText3 + "'>";
+  html += "Kontakt 4: <input type='text' name='msg4' value='" + customText4 + "'>";
   html += "<input type='submit' value='Nachrichten aktualisieren'></form>";
   //Telegram
   html += "<h2>Telegram Chat-ID</h2>";
@@ -285,7 +309,7 @@ void handleRoot() {
   html += "<button onclick=\"location.href='/simulateContact2'\">Simuliere Kontakt 2</button>";
   //Error-Log
   html += "<h2>Error-Log</h2><div id='log'></div>";
-  html += "<form id='logForm' action='/clearLog' method='POST'><br>";
+  html += "<form id='logForm' action='/clearLog' method='POST'>";
   html += "<input type='hidden' name='password' id='logPasswordField'>";
   html += "<input type='button' value='Error-Log löschen' onclick='showLogPasswordModal()'>";
   html += "</form>"; 
@@ -297,19 +321,42 @@ void handleRoot() {
   html += "<h3>Passwort eingeben</h3>";
   html += "<div style='display:flex; align-items:center;'>";
   html += "<input type='password' id='passwordInput' style='flex:1;'>";
-  html += "<button type='button' onclick='togglePassword()' style='background:transparent; border:none; font-size:1.2em; cursor:pointer; padding:0 6px; margin-left:6px;'>👁️</button>";
+  html += "<button type='button' onclick='togglePassword(this)' data-target='passwordInput' style='background:transparent; border:none; padding:0 6px; margin-left:6px; cursor:pointer;'>";
+  html += "<span class='eye-show'>";
+  html += "<svg viewBox='0 0 24 24' width='24' height='24' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>";
+  html += "<path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z'></path>";
+  html += "<circle cx='12' cy='12' r='3'></circle>";
+  html += "</svg></span>";
+  html += "<span class='eye-hide' style='display:none;'>";
+  html += "<svg viewBox='0 0 24 24' width='24' height='24' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>";
+  html += "<path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z'></path>";
+  html += "<circle cx='12' cy='12' r='3'></circle>";
+  html += "<path d='M3 3l18 18'></path>";
+  html += "</svg></span>";
+  html += "</button>";
   html += "</div><br>";
   html += "<button onclick='submitChatForm()'>OK</button> ";
   html += "<button onclick='hidePasswordModal()'>Abbrechen</button>";
   html += "</div>";
-  html += "<div id='modalBackdrop' onclick='hidePasswordModal()' style='display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index:999;'></div>";
   //Modal für Passworteingabe Error-Log löschen
   html += "<div id='logPasswordModal' style='display:none; position:fixed; top:40%; left:50%; transform:translate(-50%, -50%); background:#fff; ";
   html += "padding:20px; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000; border-radius:10px;'>";
   html += "<h3>Passwort für Log-Löschung</h3>";
   html += "<div style='display:flex; align-items:center;'>";
   html += "<input type='password' id='logPasswordInput' style='flex:1;'>";
-  html += "<button type='button' onclick='toggleLogPassword()' style='background:transparent; border:none; font-size:1.2em; cursor:pointer; padding:0 6px; margin-left:6px;'>👁️</button>";
+  html += "<button type='button' onclick='togglePassword(this)' data-target='logPasswordInput' style='background:transparent; border:none; padding:0 6px; margin-left:6px; cursor:pointer;'>";
+  html += "<span class='eye-show'>";
+  html += "<svg viewBox='0 0 24 24' width='24' height='24' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>";
+  html += "<path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z'></path>";
+  html += "<circle cx='12' cy='12' r='3'></circle>";
+  html += "</svg></span>";
+  html += "<span class='eye-hide' style='display:none;'>";
+  html += "<svg viewBox='0 0 24 24' width='24' height='24' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>";
+  html += "<path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z'></path>";
+  html += "<circle cx='12' cy='12' r='3'></circle>";
+  html += "<path d='M3 3l18 18'></path>";
+  html += "</svg></span>";
+  html += "</button>";
   html += "</div><br>";
   html += "<button onclick='submitLogForm()'>OK</button> ";
   html += "<button onclick='hideLogPasswordModal()'>Abbrechen</button>";
@@ -336,9 +383,15 @@ void handleRoot() {
   html += "document.getElementById('logPasswordField').value = pw;";
   html += "document.getElementById('logForm').submit();";
   html += "}";
-  html += "function toggleLogPassword() {";
-  html += "var input = document.getElementById('logPasswordInput');";
-  html += "input.type = (input.type === 'password') ? 'text' : 'password';";
+  html += "function togglePassword(button) {";
+  html += "  const inputId = button.getAttribute('data-target');";
+  html += "  const input = document.getElementById(inputId);";
+  html += "  const showIcon = button.querySelector('.eye-show');";
+  html += "  const hideIcon = button.querySelector('.eye-hide');";
+  html += "  const isHidden = input.type === 'password';";
+  html += "  input.type = isHidden ? 'text' : 'password';";
+  html += "  showIcon.style.display = isHidden ? 'none' : 'inline';";
+  html += "  hideIcon.style.display = isHidden ? 'inline' : 'none';";
   html += "}";
   html += "let espClock;";
   html += "function startLiveClock(baseTimeStr) {";
@@ -348,7 +401,6 @@ void handleRoot() {
   html += "    document.getElementById('espTime').innerText = now.toLocaleString('de-DE');";
   html += "  }, 1000);";
   html += "}";
-
   html += "</script>";
   //Java-Script Ende
   html += "</body></html>";
@@ -393,12 +445,19 @@ void handleSimulateContact2() {
 }
 
 void handleSetMessages() {
-  if (server.hasArg("msg1") && server.hasArg("msg2")) {
-    customText1 = server.arg("msg1");
-    customText2 = server.arg("msg2");
-    saveCustomTexts();
-    logEvent("Nachrichten aktualisiert: " + customText1 + " / " + customText2);
-  }
+  if (server.hasArg("msg1")) customText1 = server.arg("msg1");
+  if (server.hasArg("msg2")) customText2 = server.arg("msg2");
+  if (server.hasArg("msg3")) customText3 = server.arg("msg3");
+  if (server.hasArg("msg4")) customText4 = server.arg("msg4");
+
+  saveCustomTexts();
+
+  logEvent("Nachrichten aktualisiert: " +
+    customText1 + " / " +
+    customText2 + " / " +
+    customText3 + " / " +
+    customText4);
+
   server.sendHeader("Location", "/");
   server.send(303);
 }
@@ -450,6 +509,8 @@ void setup() {
   loadErrorLog();
   pinMode(CONTACT_PIN1, INPUT_PULLUP);
   pinMode(CONTACT_PIN2, INPUT_PULLUP);
+  pinMode(CONTACT_PIN3, INPUT_PULLUP);
+  pinMode(CONTACT_PIN4, INPUT_PULLUP);
   WiFi.setHostname("MuehlenBuddy");
   if (!connectToWiFi()) {
     logEvent("Keine WLAN-Verbindung möglich!");
@@ -485,8 +546,12 @@ void loop() {
 
   int currentState1 = digitalRead(CONTACT_PIN1);
   int currentState2 = digitalRead(CONTACT_PIN2);
+  int currentState3 = digitalRead(CONTACT_PIN3);
+  int currentState4 = digitalRead(CONTACT_PIN4);
   contactStatus1 = (currentState1 == HIGH) ? "Offen" : "Geschlossen";
   contactStatus2 = (currentState2 == HIGH) ? "Offen" : "Geschlossen";
+  contactStatus3 = (currentState3 == HIGH) ? "Offen" : "Geschlossen";
+  contactStatus4 = (currentState4 == HIGH) ? "Offen" : "Geschlossen";
 
   unsigned long currentMillis = millis();
   if (currentState1 == LOW && lastContactState1 == HIGH && (currentMillis - lastSendTime1 >= debounceInterval)) {
@@ -499,8 +564,18 @@ void loop() {
     //logEvent("Kontakt 2 betätigt"); //Log wächst sonst möglicherweise zu stark an.
     lastSendTime2 = currentMillis;
   }
+  if (currentState3 == LOW && lastContactState3 == HIGH && (currentMillis - lastSendTime3 >= debounceInterval)) {
+    sendTelegramMessage("Kontakt 3 wurde betätigt!");
+    lastSendTime3 = currentMillis;
+  }
+  if (currentState4 == LOW && lastContactState4 == HIGH && (currentMillis - lastSendTime4 >= debounceInterval)) {
+    sendTelegramMessage("Kontakt 4 wurde betätigt!");
+    lastSendTime4 = currentMillis;
+  }
 
   lastContactState1 = currentState1;
   lastContactState2 = currentState2;
+  lastContactState3 = currentState3;
+  lastContactState4 = currentState4;
   delay(100);
 }
