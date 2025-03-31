@@ -260,7 +260,7 @@ void handleRoot() {
     html += "  box-shadow: none;";
   html += "  color: #2c5777;";
   html += "}";
-
+  html += "button.eye-toggle {outline: none;box-shadow: none;margin: 0;}button.eye-toggle:focus {outline: none;box-shadow: none;}";
   html += "</style>";
   html += "<script>function updateStatus() {";
   html += "var xhttp = new XMLHttpRequest();";
@@ -321,7 +321,7 @@ void handleRoot() {
   html += "<h3>Passwort eingeben</h3>";
   html += "<div style='display:flex; align-items:center;'>";
   html += "<input type='password' id='passwordInput' style='flex:1;'>";
-  html += "<button type='button' onclick='togglePassword(this)' data-target='passwordInput' style='background:transparent; border:none; padding:0 6px; margin-left:6px; cursor:pointer;'>";
+  html += "<button type='button' class='eye-toggle' onclick='togglePassword(this)' data-target='passwordInput' style='background:transparent; border:none; padding:0 6px; margin-left:6px; cursor:pointer;'>";
   html += "<span class='eye-show'>";
   html += "<svg viewBox='0 0 24 24' width='24' height='24' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>";
   html += "<path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z'></path>";
@@ -344,7 +344,7 @@ void handleRoot() {
   html += "<h3>Passwort für Log-Löschung</h3>";
   html += "<div style='display:flex; align-items:center;'>";
   html += "<input type='password' id='logPasswordInput' style='flex:1;'>";
-  html += "<button type='button' onclick='togglePassword(this)' data-target='logPasswordInput' style='background:transparent; border:none; padding:0 6px; margin-left:6px; cursor:pointer;'>";
+  html += "<button type='button' class='eye-toggle' onclick='togglePassword(this)' data-target='logPasswordInput' style='background:transparent; border:none; padding:0 6px; margin-left:6px; cursor:pointer;'>";
   html += "<span class='eye-show'>";
   html += "<svg viewBox='0 0 24 24' width='24' height='24' stroke='currentColor' fill='none' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>";
   html += "<path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z'></path>";
