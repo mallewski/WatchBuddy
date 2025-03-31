@@ -9,6 +9,9 @@
 #include <Preferences.h>
 #include <ArduinoOTA.h>
 
+//Name
+const String NAME = "MuehlenBuddy";
+
 // Telegram-Daten
 const String telegramUrl = "https://api.telegram.org/bot" + botToken + "/sendMessage";
 String chatId = defaultChatId;
@@ -208,7 +211,7 @@ void handleStatus() {
 }
 
 void handleRoot() {
-  String html = "<html><head><title>MuehlenBuddy Dashboard</title><meta charset='UTF-8'>";
+  String html = "<html><head><title>" + String(NAME) + " Dashboard</title><meta charset='UTF-8'>";
   html += "<style>";
   html += "body { font-family: sans-serif; background:#f4f4f4; margin:0; padding:0; }";
   html += ".container { max-width: 800px; margin: 30px auto; background: #fff; padding: 20px; box-shadow: 0 0 12px rgba(0,0,0,0.1); border-radius: 10px; }";
@@ -511,7 +514,7 @@ void setup() {
   pinMode(CONTACT_PIN2, INPUT_PULLUP);
   pinMode(CONTACT_PIN3, INPUT_PULLUP);
   pinMode(CONTACT_PIN4, INPUT_PULLUP);
-  WiFi.setHostname("MuehlenBuddy");
+  WiFi.setHostname((NAME).c_str());
   if (!connectToWiFi()) {
     logEvent("Keine WLAN-Verbindung möglich!");
     Serial.println("❌ WLAN-Verbindung fehlgeschlagen – Neustart in 30 Sekunden");
@@ -522,11 +525,11 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("MuehlenBuddy Firmware-Version: " + String(FIRMWARE_VERSION));
+  Serial.println(String(NAME) + " Firmware-Version: " + String(FIRMWARE_VERSION));
   Serial.println("\nVerbunden, IP: " + WiFi.localIP().toString());
   configTzTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org");
 
-  ArduinoOTA.setHostname("MuehlenBuddyOTA");
+  ArduinoOTA.setHostname((NAME + "OTA").c_str());
   ArduinoOTA.setPassword(otaPassword);
   ArduinoOTA.begin();
 
