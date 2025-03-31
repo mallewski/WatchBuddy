@@ -59,6 +59,9 @@ Hinweis: Wenn der Gruppenchat zu einer „Supergroup“ migriert wird, wird die 
   -> Öffne im Browser: `https://api.telegram.org/bot<DEIN_BOT_TOKEN>/getUpdates`
   -> Suche in der Antwort nach "chat":{"id":...} → Das ist die Chat-ID.
 
+- ESP32-Board
+- Arduino IDE
+
 ## Erweiterungsideen
 
 - Push via MQTT oder E-Mail
