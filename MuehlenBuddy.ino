@@ -41,7 +41,7 @@ String errorLog = "";
 String customText1 = "Mühle ist durchgelaufen!";
 String customText2 = "Kontakt 2 wurde betätigt!";
 String customText3 = "Kontakt 3 wurde betätigt!";
-String customText4 = "Kontakt 4 wurde betätigt!";
+String customText4 = "Kontakt 4 wurde ausgelöst!";
 
 
 Preferences prefs;
@@ -212,6 +212,7 @@ void handleStatus() {
 
 void handleRoot() {
   String html = "<html><head><title>" + String(NAME) + " Dashboard</title><meta charset='UTF-8'>";
+  html += "<link rel='icon' type='image/x-icon' href='data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAAAMAABMLAAATCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERH//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA'>\n";
   html += "<style>";
   html += "body { font-family: sans-serif; background:#f4f4f4; margin:0; padding:0; }";
   html += ".container { max-width: 800px; margin: 30px auto; background: #fff; padding: 20px; box-shadow: 0 0 12px rgba(0,0,0,0.1); border-radius: 10px; }";
@@ -540,6 +541,7 @@ void setup() {
   server.on("/setMessages", handleSetMessages);
   server.on("/setChatId", handleSetChatId);
   server.on("/clearLog", handleClearLog);
+
   server.begin();
 }
 
@@ -568,11 +570,11 @@ void loop() {
     lastSendTime2 = currentMillis;
   }
   if (currentState3 == LOW && lastContactState3 == HIGH && (currentMillis - lastSendTime3 >= debounceInterval)) {
-    sendTelegramMessage("Kontakt 3 wurde betätigt!");
+    sendTelegramMessage(customText3);
     lastSendTime3 = currentMillis;
   }
   if (currentState4 == LOW && lastContactState4 == HIGH && (currentMillis - lastSendTime4 >= debounceInterval)) {
-    sendTelegramMessage("Kontakt 4 wurde betätigt!");
+    sendTelegramMessage(customText4);
     lastSendTime4 = currentMillis;
   }
 
