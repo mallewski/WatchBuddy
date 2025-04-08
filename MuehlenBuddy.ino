@@ -1,4 +1,4 @@
-#define FIRMWARE_VERSION "v25.3.4"
+#define FIRMWARE_VERSION "v25.4.1"
 
 #include "secrets.h"
 #include <WiFi.h>
@@ -17,7 +17,7 @@ const String telegramUrl = "https://api.telegram.org/bot" + botToken + "/sendMes
 String chatId = defaultChatId;
 
 // Definition der Eingangs-Pins für die Kontakte
-const int CONTACT_PIN1 = 12; // bei nächster Gelegenheit zu Pin 14 wechseln (Du hast an GPIO12 einen Taster, der nach GND zieht (normal für INPUT_PULLUP) → beim Einschalten wird GPIO12 LOW → ESP32 bootet nicht mehr korrekt!)
+const int CONTACT_PIN1 = 14; // bei nächster Gelegenheit zu Pin 14 wechseln (Du hast an GPIO12 einen Taster, der nach GND zieht (normal für INPUT_PULLUP) → beim Einschalten wird GPIO12 LOW → ESP32 bootet nicht mehr korrekt!)
 const int CONTACT_PIN2 = 27;
 const int CONTACT_PIN3 = 26; 
 const int CONTACT_PIN4 = 25;
