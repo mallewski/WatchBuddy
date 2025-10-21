@@ -1,4 +1,4 @@
-# MuehlenBuddy
+# WatchBuddy
 
 ESP32-basiertes Projekt zur Überwachung von Kontakten mit Telegram-Benachrichtigung, Web-Dashboard und OTA-Update-Funktion.
 
