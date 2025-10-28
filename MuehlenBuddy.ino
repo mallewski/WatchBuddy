@@ -317,6 +317,9 @@ void handleRoot() {
   html += "<input type='hidden' name='password' id='logPasswordField'>";
   html += "<input type='button' value='Error-Log löschen' onclick='showLogPasswordModal()'>";
   html += "</form>"; 
+  //Firmwarebutton
+  html += "<p><button type='button' onclick=\"showFirmwareModal()\">Firmware-Update</button></p>";
+
   html += "<p style='text-align:right; color:#888;'>Firmware: " + String(FIRMWARE_VERSION) + "</p>";
   html += "</div>";
   // Modal für Passwort-Eingabe Chat-ID ändern
@@ -365,11 +368,26 @@ void handleRoot() {
   html += "<button onclick='submitLogForm()'>OK</button> ";
   html += "<button onclick='hideLogPasswordModal()'>Abbrechen</button>";
   html += "</div>";
+  html += R"rawliteral(
+    <div id="firmwareModal" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:#fff;
+    padding:20px; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000; border-radius:10px;">
+      <h3>Firmware-Update durchführen</h3>
+      <p>Installierte Version: )rawliteral" + String(FIRMWARE_VERSION) + R"rawliteral(</p>
+      <form method="POST" action="/update" enctype="multipart/form-data" onsubmit="return confirm('Firmware wirklich aktualisieren?')">
+        <input type="file" name="firmware" required><br><br>
+        <input type="submit" value="Upload & Update">
+        <button type="button" onclick="hideFirmwareModal()">Abbrechen</button>
+      </form>
+    </div>
+    <div id="firmwareBackdrop" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.3); z-index:999;"></div>
+  )rawliteral";
   //Java-Script
   html += "<script>";
   html += "function showPasswordModal() { document.getElementById('passwordModal').style.display = 'block'; document.getElementById('modalBackdrop').style.display = 'block'; document.getElementById('passwordInput').value = ''; document.getElementById('passwordInput').focus(); }";
   html += "function hidePasswordModal() { document.getElementById('passwordModal').style.display = 'none'; document.getElementById('modalBackdrop').style.display = 'none'; }";
   html += "function submitChatForm() { var pw = document.getElementById('passwordInput').value; if (!pw) return; document.getElementById('passwordField').value = pw; document.getElementById('chatForm').submit(); }";
+  html += "function showFirmwareModal() { document.getElementById('firmwareModal').style.display = 'block'; document.getElementById('firmwareBackdrop').style.display = 'block'; }";
+  html += "function hideFirmwareModal() { document.getElementById('firmwareModal').style.display = 'none'; document.getElementById('firmwareBackdrop').style.display = 'none'; }";
   html += "function togglePassword() { var input = document.getElementById('passwordInput'); input.type = (input.type === 'password') ? 'text' : 'password'; }";
   html += "function showLogPasswordModal() {";
   html += "document.getElementById('logPasswordModal').style.display = 'block';";
@@ -409,6 +427,27 @@ void handleRoot() {
   //Java-Script Ende
   html += "</body></html>";
   server.send(200, "text/html", html);
+}
+
+void handleFirmwareUpload() {
+  HTTPUpload& upload = server.upload();
+
+  if (upload.status == UPLOAD_FILE_START) {
+    Serial.printf("Update gestartet: %s\n", upload.filename.c_str());
+    if (!Update.begin()) {
+      Update.printError(Serial);
+    }
+  } else if (upload.status == UPLOAD_FILE_WRITE) {
+    if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+      Update.printError(Serial);
+    }
+  } else if (upload.status == UPLOAD_FILE_END) {
+    if (Update.end(true)) {
+      Serial.printf("Update abgeschlossen: %u Bytes\n", upload.totalSize);
+    } else {
+      Update.printError(Serial);
+    }
+  }
 }
 
 void handleSetChatId() {
@@ -541,6 +580,23 @@ void setup() {
   server.on("/setMessages", handleSetMessages);
   server.on("/setChatId", handleSetChatId);
   server.on("/clearLog", handleClearLog);
+  server.on("/update", HTTP_POST, []() {
+  server.sendHeader("Connection", "close");
+  server.send(200, "text/html", R"rawliteral(
+      <html><head><meta charset='UTF-8'><title>Update</title><style>
+        body { font-family: sans-serif; background: #f8f9fa; text-align: center; padding: 50px; }
+        .status { font-size: 1.5em; color: #007bff; }
+      </style></head><body>
+      <p class='status'>Firmware-Update erfolgreich.<br>Neustart in wenigen Sekunden...</p>
+      <script>
+        setTimeout(() => window.location.href = "/", 10000);
+      </script>
+      </body></html>
+    )rawliteral");
+    delay(1000);
+    ESP.restart();
+  }, handleFirmwareUpload);
+
 
   server.begin();
 }
