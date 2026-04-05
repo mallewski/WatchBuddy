@@ -1,6 +1,6 @@
 # WatchBuddy
 
-ESP32-basiertes Projekt zur Überwachung von Kontakten mit Telegram-Benachrichtigung, Web-Dashboard und OTA-Update-Funktion.
+ESP32-basiertes Projekt zur Überwachung von Kontaktbetätigung mit Telegram-Benachrichtigung, Web-Dashboard und OTA-Update-Funktion.
 
 ## Funktionen
 
