@@ -10,7 +10,7 @@
 #include <ArduinoOTA.h>
 
 //Name
-const String NAME = "MuehlenBuddy";
+const String NAME = "WatchBuddy";
 
 // Telegram-Daten
 const String telegramUrl = "https://api.telegram.org/bot" + botToken + "/sendMessage";
@@ -38,7 +38,7 @@ String contactStatus4 = "Unbekannt";
 String errorLog = "";
 
 // Benutzerdefinierte Nachrichtentexte
-String customText1 = "Mühle ist durchgelaufen!";
+String customText1 = "Kontakt 1 wurde bestätigt";
 String customText2 = "Kontakt 2 wurde betätigt!";
 String customText3 = "Kontakt 3 wurde betätigt!";
 String customText4 = "Kontakt 4 wurde ausgelöst!";
@@ -284,7 +284,7 @@ void handleRoot() {
   html += "};</script></head><body>";
   //Anfang Inhalt
   html += "<div class='container'>";
-  html += "<h1>MuehlenBuddy Dashboard</h1>";
+  html += "<h1>WatchBuddy Dashboard</h1>";
   html += "<p style='text-align:right; color:#888;'>Modul-Zeit: <span id='espTime'></span></p>";
   html += "<h2>Kontaktstatus</h2>";
   html += "<p>Kontakt 1 (P" + String(CONTACT_PIN1) + "): <strong><span id='status1'>" + contactStatus1 + "</span></strong></p>";
